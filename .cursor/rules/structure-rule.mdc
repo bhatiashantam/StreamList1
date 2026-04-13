@@ -1,0 +1,149 @@
+---
+alwaysApply: true
+---
+
+---
+alwaysApply: true
+description: |
+  Strict rules for React Native + TypeScript project.
+  Enforces Zustand, React Navigation v6, Axios client, custom hooks,
+  StyleSheet styling, themed colors/spacing, and bans all prohibited libraries.
+---
+
+# 1. TypeScript & Language Rules
+
+- Use **TypeScript strict mode** (`strict: true` in tsconfig.json).
+- ❌ Do NOT use `any` – define proper types/interfaces.
+- ✅ All components, hooks, and functions must have explicit return types.
+
+# 2. Navigation Rules – Strict
+
+- ✅ **Only allowed navigation library:** React Navigation v6.
+- Use **Bottom Tab + Stack** navigators.
+- ❌ Do NOT use React Navigation v5, v7, or any other navigation library (e.g., React Native Navigation, Expo Router).
+- All navigation types must be defined in:
+  `src/navigation/types.ts`
+- ❌ Do NOT define inline navigation types inside screens.
+- ❌ Do NOT use `any` for navigation props.
+
+# 3. State Management – Strict
+
+- ✅ **Only allowed state library:** Zustand.
+- ❌ **Strictly prohibited:** Redux, MobX, Context API for global state, Recoil, Jotai, or any other state management library.
+- Store slices in `src/store/` (e.g., `useWatchlistStore.ts`).
+- ✅ Keep stores flat and slice‑based.
+
+# 4. Styling – Strict
+
+- ✅ **Only allowed styling method:** `StyleSheet.create()`.
+- ❌ **Strictly prohibited:**
+  - NativeWind (Tailwind for React Native)
+  - Styled Components
+  - Any CSS-in-JS library (e.g., Emotion, Linaria)
+  - Inline `style={{...}}` props (except for dynamic values like `opacity`, `transform`)
+- ❌ **Strictly prohibited:** Pre-built UI component libraries – no React Native Paper, NativeBase, UI Kitten, React Native Elements, or any other component library.
+- ✅ All styles must be defined at the bottom of each component file using `StyleSheet.create()`.
+
+## 4.1 Colors
+
+- All color values must come from:
+  `src/theme/colors.ts`
+- ❌ No hardcoded hex codes (e.g., `"#FF5733"`).
+
+## 4.2 Spacing
+
+- All spacing values (margin, padding, gap) must come from:
+  `src/theme/spacing.ts`
+- ❌ No literal numbers like `12` or `16` – use `spacing.md`, `spacing.lg`, etc.
+
+## 4.3 Layout & Borders (Hard Rule)
+
+- ❌ **Strictly prohibited:** Using borders (`borderWidth`, `borderColor`) to define sections, cards, dividers, or containers.
+- ❌ Do NOT use 1px lines, separators, or stroke-based layouts.
+
+- ✅ All visual separation must be achieved using:
+  - Background color differences (from `src/theme/colors.ts`)
+  - Spacing (margin/padding from `src/theme/spacing.ts`)
+  - Elevation / shadow (if needed, platform-specific)
+
+- ✅ Sections must feel separated through layout, NOT lines.
+
+- ⚠️ This is a **HARD RULE** — any use of borders for layout separation is considered a violation.
+
+# 5. API & Data Fetching Rules
+
+## 5.1 API Client
+
+- All HTTP calls must go through:
+  `src/api/client.ts`
+- ❌ Direct `axios` usage is prohibited in hooks, components, or stores.
+- ✅ Use exported methods: `get()`, `post()`, `put()`, `delete()`.
+- ❌ **Hardcoded API keys anywhere in source files are strictly prohibited.** Use environment variables (e.g., `process.env.API_KEY`).
+
+## 5.2 Data Fetching per Screen
+
+- Every screen must fetch data exclusively via a **custom hook**.
+- ❌ Do NOT use `useEffect` + API calls directly inside screen components.
+- ✅ Create hooks inside `src/hooks/` (e.g., `useHomeData`, `useUserProfile`).
+- Hooks are responsible for:
+  - API calls
+  - Loading state
+  - Error handling
+  - Data transformation
+
+# 6. Persistence (Watchlist)
+
+- Use **AsyncStorage** for local persistence.
+- ❌ Do NOT use SQLite, MMKV, or any other local database.
+- ✅ Create a Zustand middleware that syncs watchlist to AsyncStorage.
+
+# 7. Font Rules
+
+- Use **Manrope** for headings and **Inter** for body text.
+- Load fonts via `react-native-google-fonts`.
+- ❌ Do NOT use system defaults or other font families.
+- ✅ Define font constants in `src/theme/typography.ts`.
+
+# 8. Project Structure (Required)
+
+ottplaystreamlist/
+├── src/
+│   ├── api/
+│   │   ├── client.ts          # Central Axios instance with interceptors
+│   │   ├── movies.ts          # All movie/show endpoint functions
+│   │   └── types.ts           # TypeScript interfaces for all API responses
+│   ├── components/
+│   │   ├── common/            # Shared across screens (ContentCard, Badge, SkeletonCard, etc.)
+│   │   └── [screen-name]/     # Screen-specific components
+│   ├── hooks/
+│   │   ├── useHome.ts
+│   │   ├── useSearch.ts
+│   │   └── useMovieDetail.ts
+│   ├── navigation/
+│   │   ├── RootNavigator.tsx  # Bottom tab navigator
+│   │   └── types.ts           # Navigation param types
+│   ├── screens/
+│   │   ├── HomeScreen.tsx
+│   │   ├── SearchScreen.tsx
+│   │   ├── DetailScreen.tsx
+│   │   ├── WatchlistScreen.tsx
+│   │   └── ProfileScreen.tsx  # Placeholder only
+│   ├── store/
+│   │   └── watchlistStore.ts  # Zustand store with AsyncStorage persistence
+│   ├── theme/
+│   │   ├── colors.ts          # All color tokens
+│   │   ├── typography.ts      # Font sizes, weights, line heights
+│   │   └── spacing.ts         # Spacing scale
+│   └── utils/
+│       └── image.ts           # TMDB image URL helpers
+├── .env                       # Never committed
+├── .env.example               # Committed — placeholder values only
+├── .gitignore
+├── .cursor/rules              # Your cursor rules — committed
+├── prompt-logs/               # SpecStory exports — committed
+│   └── .gitkeep
+├── docs/
+│   └── ADR.md                 # Architectural Decisions Record
+├── app.json
+├── tsconfig.json              # Strict mode enabled
+└── package.json
