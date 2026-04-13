@@ -19,4 +19,7 @@ export const colors = {
   
     // Utility
     outline_variant:           'rgba(255,255,255,0.15)', // Ghost borders (accessibility only)
+
+    /** Tab bar glass overlay — BlurView + tint (matches #232323 @ 70% opacity) */
+    tab_bar_overlay:           'rgba(35,35,35,0.70)',
   };
