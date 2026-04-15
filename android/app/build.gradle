@@ -117,3 +117,6 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// Bundle Ionicons (and other) fonts so react-native-vector-icons render on Android
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -7,9 +7,11 @@ import {
 import { BlurView } from '@react-native-community/blur';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
+import { typography } from '../theme/typography';
 import { useWatchlistStore, selectWatchlistCount } from '../store/watchlistStore';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SearchScreen } from '../screens/SearchScreen';
@@ -38,14 +40,26 @@ const stackScreenOptions = {
   contentStyle: { backgroundColor: colors.surface },
 };
 
+/** Matches @react-navigation/bottom-tabs default row height (icon + label). */
+const TAB_BAR_CONTENT_HEIGHT = 49;
+
+/** Slightly under default 25 from TabBarIcon — reads cleaner in the bar. */
+const TAB_BAR_ICON_SIZE = 22;
+
 function GlassTabBarBackground(): React.JSX.Element {
   return (
     <View style={[StyleSheet.absoluteFill, styles.glassRoot]}>
+      {/* Dark base so rounded corners never show OS/window white behind blur */}
+      <View
+        style={[StyleSheet.absoluteFill, styles.glassBase]}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      />
       <BlurView
         style={StyleSheet.absoluteFill}
         blurType="dark"
-        blurAmount={Platform.OS === 'ios' ? 24 : 20}
-        reducedTransparencyFallbackColor={colors.surface_container}
+        blurAmount={Platform.OS === 'ios' ? 28 : 24}
+        reducedTransparencyFallbackColor={colors.surface}
       />
       <View
         style={[
@@ -129,6 +143,17 @@ function ProfileStackNavigator(): React.JSX.Element {
 
 export function RootNavigator(): React.JSX.Element {
   const watchlistCount = useWatchlistStore(selectWatchlistCount);
+  const insets = useSafeAreaInsets();
+
+  const tabBarStyle = useMemo(() => {
+    const padBottom = Math.max(
+      insets.bottom - (Platform.OS === 'ios' ? 4 : 0),
+      0,
+    );
+    const topInset = spacing.sm;
+    const height = TAB_BAR_CONTENT_HEIGHT + topInset + padBottom;
+    return [styles.tabBar, { height, paddingTop: topInset }];
+  }, [insets.bottom]);
 
   return (
     <Tab.Navigator
@@ -136,7 +161,9 @@ export function RootNavigator(): React.JSX.Element {
         headerShown: false,
         tabBarActiveTintColor: colors.primary_container,
         tabBarInactiveTintColor: colors.on_surface_variant,
-        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabBarLabel,
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarStyle,
         tabBarBackground: () => <GlassTabBarBackground />,
       }}
     >
@@ -145,10 +172,10 @@ export function RootNavigator(): React.JSX.Element {
         component={HomeStackNavigator}
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size, focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
-              size={size}
+              size={TAB_BAR_ICON_SIZE}
               color={color}
             />
           ),
@@ -159,10 +186,10 @@ export function RootNavigator(): React.JSX.Element {
         component={SearchStackNavigator}
         options={{
           title: 'Search',
-          tabBarIcon: ({ color, size, focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'search' : 'search-outline'}
-              size={size}
+              size={TAB_BAR_ICON_SIZE}
               color={color}
             />
           ),
@@ -176,10 +203,10 @@ export function RootNavigator(): React.JSX.Element {
           tabBarBadge:
             watchlistCount > 0 ? String(watchlistCount) : undefined,
           tabBarBadgeStyle: styles.watchlistBadge,
-          tabBarIcon: ({ color, size, focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'bookmark' : 'bookmark-outline'}
-              size={size}
+              size={TAB_BAR_ICON_SIZE}
               color={color}
             />
           ),
@@ -190,10 +217,10 @@ export function RootNavigator(): React.JSX.Element {
         component={ProfileStackNavigator}
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size, focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              size={size}
+              size={TAB_BAR_ICON_SIZE}
               color={color}
             />
           ),
@@ -206,11 +233,28 @@ export function RootNavigator(): React.JSX.Element {
 const styles = StyleSheet.create({
   glassRoot: {
     overflow: 'hidden',
+    borderTopLeftRadius: spacing.xl,
+    borderTopRightRadius: spacing.xl,
+  },
+  glassBase: {
+    backgroundColor: colors.surface,
   },
   tabBar: {
     borderTopWidth: 0,
     backgroundColor: 'transparent',
     elevation: 0,
+    shadowOpacity: 0,
+    paddingHorizontal: spacing.xs,
+    borderTopLeftRadius: spacing.xl,
+    borderTopRightRadius: spacing.xl,
+  },
+  tabBarItem: {
+    paddingHorizontal: spacing.sm,
+  },
+  tabBarLabel: {
+    ...typography.labelSm,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   watchlistBadge: {
     backgroundColor: colors.primary_container,
