@@ -16,6 +16,7 @@ import { SearchScreen } from '../screens/SearchScreen';
 import { WatchlistScreen } from '../screens/WatchlistScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { DetailScreen } from '../screens/DetailScreen';
+import { SeeAllScreen } from '../screens/SeeAllScreen';
 import type {
   HomeStackParamList,
   SearchStackParamList,
@@ -62,12 +63,19 @@ function HomeStackNavigator(): React.JSX.Element {
       <HomeStack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Home' }}
+        options={{ headerShown: false }}
       />
       <HomeStack.Screen
         name="Detail"
         component={DetailScreen}
         options={{ title: 'Details' }}
+      />
+      <HomeStack.Screen
+        name="SeeAll"
+        component={SeeAllScreen}
+        options={({ route }): { title: string } => ({
+          title: route.params.title,
+        })}
       />
     </HomeStack.Navigator>
   );

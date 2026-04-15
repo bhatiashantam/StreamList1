@@ -6,9 +6,18 @@ export type DetailScreenParams = {
   mediaType: 'movie' | 'tv';
 };
 
+export type SeeAllListKind = 'trending' | 'top_rated' | 'discover';
+
+export type SeeAllScreenParams = {
+  listKind: SeeAllListKind;
+  genreId: number | null;
+  title: string;
+};
+
 export type HomeStackParamList = {
   Home: undefined;
   Detail: DetailScreenParams;
+  SeeAll: SeeAllScreenParams;
 };
 
 export type SearchStackParamList = {
