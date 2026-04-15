@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
+import type { RouteProp } from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {
   Platform,
   StyleSheet,
   View,
 } from 'react-native';
+import type { ViewStyle } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -27,6 +30,20 @@ import type {
   MainTabParamList,
 } from './types';
 
+/** Full-screen stack routes: tab bar should not show (detail, see-all). */
+const ROUTES_HIDE_TAB_BAR = new Set<string>(['Detail', 'SeeAll']);
+
+function tabBarStyleForNestedStack(
+  route: RouteProp<MainTabParamList, keyof MainTabParamList>,
+  visibleStyle: ViewStyle,
+): ViewStyle {
+  const focused = getFocusedRouteNameFromRoute(route);
+  if (focused != null && ROUTES_HIDE_TAB_BAR.has(focused)) {
+    return { display: 'none' };
+  }
+  return visibleStyle;
+}
+
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const SearchStack = createNativeStackNavigator<SearchStackParamList>();
@@ -38,6 +55,13 @@ const stackScreenOptions = {
   headerTintColor: colors.on_surface,
   headerTitleStyle: { color: colors.on_surface },
   contentStyle: { backgroundColor: colors.surface },
+};
+
+/** Detail: custom floating header in DetailScreen (blur over hero). */
+const detailScreenOptions = {
+  headerShown: false,
+  contentStyle: { backgroundColor: colors.surface },
+  ...(Platform.OS === 'android' ? { statusBarTranslucent: true } : {}),
 };
 
 /** Matches @react-navigation/bottom-tabs default row height (icon + label). */
@@ -82,7 +106,7 @@ function HomeStackNavigator(): React.JSX.Element {
       <HomeStack.Screen
         name="Detail"
         component={DetailScreen}
-        options={{ title: 'Details' }}
+        options={detailScreenOptions}
       />
       <HomeStack.Screen
         name="SeeAll"
@@ -106,7 +130,14 @@ function SearchStackNavigator(): React.JSX.Element {
       <SearchStack.Screen
         name="Detail"
         component={DetailScreen}
-        options={{ title: 'Details' }}
+        options={detailScreenOptions}
+      />
+      <SearchStack.Screen
+        name="SeeAll"
+        component={SeeAllScreen}
+        options={({ route }): { title: string } => ({
+          title: route.params.title,
+        })}
       />
     </SearchStack.Navigator>
   );
@@ -123,7 +154,14 @@ function WatchlistStackNavigator(): React.JSX.Element {
       <WatchlistStack.Screen
         name="Detail"
         component={DetailScreen}
-        options={{ title: 'Details' }}
+        options={detailScreenOptions}
+      />
+      <WatchlistStack.Screen
+        name="SeeAll"
+        component={SeeAllScreen}
+        options={({ route }): { title: string } => ({
+          title: route.params.title,
+        })}
       />
     </WatchlistStack.Navigator>
   );
@@ -145,14 +183,16 @@ export function RootNavigator(): React.JSX.Element {
   const watchlistCount = useWatchlistStore(selectWatchlistCount);
   const insets = useSafeAreaInsets();
 
-  const tabBarStyle = useMemo(() => {
+  const tabBarStyleVisible = useMemo((): ViewStyle => {
     const padBottom = Math.max(
       insets.bottom - (Platform.OS === 'ios' ? 4 : 0),
       0,
     );
     const topInset = spacing.sm;
     const height = TAB_BAR_CONTENT_HEIGHT + topInset + padBottom;
-    return [styles.tabBar, { height, paddingTop: topInset }];
+    return {
+      ...StyleSheet.flatten([styles.tabBar, { height, paddingTop: topInset }]),
+    };
   }, [insets.bottom]);
 
   return (
@@ -163,15 +203,16 @@ export function RootNavigator(): React.JSX.Element {
         tabBarInactiveTintColor: colors.on_surface_variant,
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
-        tabBarStyle,
+        tabBarStyle: tabBarStyleVisible,
         tabBarBackground: () => <GlassTabBarBackground />,
       }}
     >
       <Tab.Screen
         name="HomeTab"
         component={HomeStackNavigator}
-        options={{
+        options={({ route }) => ({
           title: 'Home',
+          tabBarStyle: tabBarStyleForNestedStack(route, tabBarStyleVisible),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
@@ -179,13 +220,14 @@ export function RootNavigator(): React.JSX.Element {
               color={color}
             />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name="SearchTab"
         component={SearchStackNavigator}
-        options={{
+        options={({ route }) => ({
           title: 'Search',
+          tabBarStyle: tabBarStyleForNestedStack(route, tabBarStyleVisible),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'search' : 'search-outline'}
@@ -193,16 +235,17 @@ export function RootNavigator(): React.JSX.Element {
               color={color}
             />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name="WatchlistTab"
         component={WatchlistStackNavigator}
-        options={{
+        options={({ route }) => ({
           title: 'Watchlist',
           tabBarBadge:
             watchlistCount > 0 ? String(watchlistCount) : undefined,
           tabBarBadgeStyle: styles.watchlistBadge,
+          tabBarStyle: tabBarStyleForNestedStack(route, tabBarStyleVisible),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'bookmark' : 'bookmark-outline'}
@@ -210,7 +253,7 @@ export function RootNavigator(): React.JSX.Element {
               color={color}
             />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name="ProfileTab"

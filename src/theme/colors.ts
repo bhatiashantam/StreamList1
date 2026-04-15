@@ -11,11 +11,30 @@ export const colors = {
     // Primary accent (Coral-Red)
     primary:                   '#FFB3AE',  // Gradient start / light tint
     primary_container:         '#FF5351',  // Gradient end / strong accent
-    secondary_container:       '#822625',  // Active chip state (deep red)
+    secondary_container:       '#822625',  // Rating chip (dark reddish-brown)
+    /** Full-width detail header blur tint (over BlurView) */
+    detail_header_scrim:       'rgba(10, 10, 10, 0.52)',
+    /** Android @react-native-community/blur overlay — keep translucent so blur stays visible */
+    header_blur_android_overlay: 'rgba(22, 22, 22, 0.33)',
+    /** Circular back/share glass — tint above BlurView */
+    header_glass_icon_overlay:   'rgba(38, 38, 38, 0.40)',
+    /** Full-width detail header bar — tint above BlurView */
+    header_bar_glass_overlay:    'rgba(14, 14, 14, 0.34)',
+    /** Text + icons on coral “Add to Watchlist” gradient (dark, per design) */
+    on_primary_gradient:       '#1C1B1B',
+    /**
+     * Outlined / ghost controls (e.g. “In Watchlist”) — border + label + icons.
+     * Light coral (#FFB3AE), not primary_container, so it matches the mock’s thin coral stroke.
+     */
+    watchlist_ghost_accent:    '#FFB3AE',
+    /** Small uppercase captions on dark (neutral grey, not pink-tinted variant text) */
+    on_surface_caption:        '#9A9694',
   
     // Text
     on_surface:                '#E5E2E1',  // Primary text — never use pure white
     on_surface_variant:        '#E4BDBA',  // Secondary metadata text
+    /** Icons / labels on dark hero imagery and primary gradient CTAs */
+    on_hero:                   '#FFFFFF',
   
     // Utility
     outline_variant:           'rgba(255,255,255,0.15)', // Ghost borders (accessibility only)

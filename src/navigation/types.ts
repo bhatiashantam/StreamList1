@@ -6,12 +6,20 @@ export type DetailScreenParams = {
   mediaType: 'movie' | 'tv';
 };
 
-export type SeeAllListKind = 'trending' | 'top_rated' | 'discover';
+export type SeeAllListKind =
+  | 'trending'
+  | 'top_rated'
+  | 'discover'
+  | 'similar';
 
 export type SeeAllScreenParams = {
   listKind: SeeAllListKind;
   genreId: number | null;
   title: string;
+  /** Required when `listKind` is `similar`. */
+  sourceMovieId?: number;
+  /** Required when `listKind` is `similar` (TMDB path `/movie/` vs `/tv/`). */
+  sourceMediaType?: 'movie' | 'tv';
 };
 
 export type HomeStackParamList = {
@@ -23,11 +31,13 @@ export type HomeStackParamList = {
 export type SearchStackParamList = {
   Search: undefined;
   Detail: DetailScreenParams;
+  SeeAll: SeeAllScreenParams;
 };
 
 export type WatchlistStackParamList = {
   Watchlist: undefined;
   Detail: DetailScreenParams;
+  SeeAll: SeeAllScreenParams;
 };
 
 export type ProfileStackParamList = {

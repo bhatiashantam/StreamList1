@@ -9,7 +9,11 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../navigation/types';
+import type {
+  HomeStackParamList,
+  SearchStackParamList,
+  WatchlistStackParamList,
+} from '../navigation/types';
 import type { TMDBMovie } from '../api/types';
 import { useSeeAllMovies } from '../hooks/useSeeAllMovies';
 import { colors } from '../theme/colors';
@@ -17,11 +21,21 @@ import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import { tmdbPosterUrl } from '../utils/image';
 
+export type SeeAllScreenProps =
+  | NativeStackScreenProps<HomeStackParamList, 'SeeAll'>
+  | NativeStackScreenProps<SearchStackParamList, 'SeeAll'>
+  | NativeStackScreenProps<WatchlistStackParamList, 'SeeAll'>;
+
 export function SeeAllScreen({
   navigation,
   route,
-}: NativeStackScreenProps<HomeStackParamList, 'SeeAll'>): React.JSX.Element {
-  const { listKind, genreId } = route.params;
+}: SeeAllScreenProps): React.JSX.Element {
+  const {
+    listKind,
+    genreId,
+    sourceMovieId,
+    sourceMediaType,
+  } = route.params;
   const {
     movies,
     initialLoading,
@@ -29,7 +43,12 @@ export function SeeAllScreen({
     error,
     hasMore,
     loadMore,
-  } = useSeeAllMovies({ kind: listKind, genreId });
+  } = useSeeAllMovies({
+    kind: listKind,
+    genreId,
+    sourceMovieId,
+    sourceMediaType,
+  });
 
   const onEndReached = useCallback((): void => {
     if (!hasMore || loadingMore) {
@@ -46,7 +65,10 @@ export function SeeAllScreen({
           accessibilityRole="button"
           style={styles.row}
           onPress={(): void => {
-            navigation.navigate('Detail', { id: item.id, mediaType: 'movie' });
+            navigation.navigate('Detail', {
+              id: item.id,
+              mediaType: sourceMediaType ?? 'movie',
+            });
           }}
         >
           <View style={styles.thumbShell}>
@@ -67,7 +89,7 @@ export function SeeAllScreen({
         </Pressable>
       );
     },
-    [navigation],
+    [navigation, sourceMediaType],
   );
 
   if (initialLoading) {

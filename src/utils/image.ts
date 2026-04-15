@@ -2,6 +2,7 @@ const IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
 export type PosterSize = 'w185' | 'w342' | 'w500';
 export type BackdropSize = 'w780' | 'w1280';
+export type ProfileSize = 'w185' | 'w342';
 
 export function tmdbPosterUrl(
   path: string | null,
@@ -16,6 +17,16 @@ export function tmdbPosterUrl(
 export function tmdbBackdropUrl(
   path: string | null,
   size: BackdropSize = 'w780',
+): string | undefined {
+  if (!path) {
+    return undefined;
+  }
+  return `${IMAGE_BASE}/${size}${path}`;
+}
+
+export function tmdbProfileUrl(
+  path: string | null,
+  size: ProfileSize = 'w185',
 ): string | undefined {
   if (!path) {
     return undefined;

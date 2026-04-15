@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { fetchSimilarMovies } from '../api/movieDetail';
 import {
   fetchDiscoverMovies,
   fetchTopRatedMovies,
@@ -11,6 +12,8 @@ import type { SeeAllListKind } from '../navigation/types';
 export interface UseSeeAllMoviesArgs {
   kind: SeeAllListKind;
   genreId: number | null;
+  sourceMovieId?: number;
+  sourceMediaType?: 'movie' | 'tv';
 }
 
 export interface UseSeeAllMoviesResult {
@@ -25,6 +28,8 @@ export interface UseSeeAllMoviesResult {
 export function useSeeAllMovies({
   kind,
   genreId,
+  sourceMovieId,
+  sourceMediaType,
 }: UseSeeAllMoviesArgs): UseSeeAllMoviesResult {
   const [movies, setMovies] = useState<TMDBMovie[]>([]);
   const [page, setPage] = useState<number>(0);
@@ -55,6 +60,22 @@ export function useSeeAllMovies({
         setMovies((prev) =>
           nextPage === 1 ? res.results : [...prev, ...res.results],
         );
+      } else if (kind === 'similar') {
+        if (
+          sourceMovieId === undefined ||
+          sourceMediaType === undefined
+        ) {
+          throw new Error('Similar list requires source id and media type');
+        }
+        const res = await fetchSimilarMovies(
+          sourceMovieId,
+          sourceMediaType,
+          nextPage,
+        );
+        setTotalPages(res.total_pages);
+        setMovies((prev) =>
+          nextPage === 1 ? res.results : [...prev, ...res.results],
+        );
       } else {
         const res = await fetchDiscoverMovies(nextPage, genreId);
         setTotalPages(res.total_pages);
@@ -64,7 +85,7 @@ export function useSeeAllMovies({
       }
       setPage(nextPage);
     },
-    [genreId, kind],
+    [genreId, kind, sourceMediaType, sourceMovieId],
   );
 
   useEffect(() => {

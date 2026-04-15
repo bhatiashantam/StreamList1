@@ -42,6 +42,13 @@ export const typography = {
     fontWeight: '800' as TextStyle['fontWeight'],
     letterSpacing: -0.02 * 40,
   },
+  /** Detail page title under hero — Manrope 30 / 800 / -0.02em (design: large display) */
+  detailTitle: {
+    fontFamily: fontFamily.manrope.extraBold,
+    fontSize: 30,
+    fontWeight: '800' as TextStyle['fontWeight'],
+    letterSpacing: -0.02 * 30,
+  },
   /** Section headers ("Trending Now") — Manrope 28 / 700 / -0.01em */
   headlineMd: {
     fontFamily: fontFamily.manrope.bold,

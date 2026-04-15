@@ -16,6 +16,11 @@ export interface ContentCardProps {
   movie: TMDBMovie;
   genreNameById: Map<number, string>;
   onPress: (movie: TMDBMovie) => void;
+  /**
+   * When false, only the title appears under the poster (detail “More Like This” design).
+   * Default true for home rows (year • genre).
+   */
+  showSubtitle?: boolean;
 }
 
 function formatYear(date: string): string {
@@ -40,6 +45,7 @@ export function ContentCard({
   movie,
   genreNameById,
   onPress,
+  showSubtitle = true,
 }: ContentCardProps): React.JSX.Element {
   const uri = tmdbPosterUrl(movie.poster_path, 'w342');
 
@@ -58,12 +64,17 @@ export function ContentCard({
           <View style={styles.posterPlaceholder} />
         )}
       </View>
-      <Text style={styles.title} numberOfLines={2}>
+      <Text
+        style={[styles.title, !showSubtitle && styles.titleDetailSimilar]}
+        numberOfLines={2}
+      >
         {movie.title}
       </Text>
-      <Text style={styles.meta} numberOfLines={1}>
-        {`${formatYear(movie.release_date)} • ${primaryGenreLabel(movie, genreNameById)}`}
-      </Text>
+      {showSubtitle ? (
+        <Text style={styles.meta} numberOfLines={1}>
+          {`${formatYear(movie.release_date)} • ${primaryGenreLabel(movie, genreNameById)}`}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -74,7 +85,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   posterShell: {
-    borderRadius: spacing.lg,
+    borderRadius: spacing.md,
     overflow: 'hidden',
     marginBottom: spacing.sm,
   },
@@ -91,6 +102,9 @@ const styles = StyleSheet.create({
   title: {
     ...typography.titleLg,
     color: colors.on_surface,
+  },
+  titleDetailSimilar: {
+    color: colors.on_hero,
   },
   meta: {
     ...typography.labelSm,
