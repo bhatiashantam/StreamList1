@@ -39,7 +39,7 @@ export function useSeeAllMovies({
   const fetchKindPage = useCallback(
     async (nextPage: number): Promise<void> => {
       if (!hasTmdbApiKey()) {
-        setError('Missing TMDB API key. Set TMDB_API_KEY in .env');
+        setError('Missing TMDB API key. Set TMDB_API_KEY or API_KEY in .env');
         setInitialLoading(false);
         return;
       }

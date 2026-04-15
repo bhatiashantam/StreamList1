@@ -1,4 +1,5 @@
 process.env.TMDB_API_KEY = 'test-key';
+delete process.env.API_KEY;
 
 jest.mock('react-native-vector-icons/Ionicons', () => 'Icon');
 jest.mock('@react-native-community/blur', () => {

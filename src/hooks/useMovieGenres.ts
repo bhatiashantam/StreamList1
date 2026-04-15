@@ -62,7 +62,7 @@ export function useMovieGenres(): UseMovieGenresResult {
 
   const load = useCallback(async (): Promise<void> => {
     if (!hasTmdbApiKey()) {
-      setError('Missing TMDB API key. Set TMDB_API_KEY in .env');
+      setError('Missing TMDB API key. Set TMDB_API_KEY or API_KEY in .env');
       setIsLoading(false);
       return;
     }

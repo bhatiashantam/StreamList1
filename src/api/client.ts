@@ -2,6 +2,22 @@ import axios, { type AxiosInstance } from 'axios';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
+/**
+ * Reads TMDB key from env (inlined by `react-native-dotenv` from `.env`).
+ * Prefer `TMDB_API_KEY`; `API_KEY` is supported as an alias so `.env` matches common naming.
+ */
+function getTmdbApiKey(): string {
+  const primary = process.env.TMDB_API_KEY;
+  if (typeof primary === 'string' && primary.trim().length > 0) {
+    return primary.trim();
+  }
+  const alias = process.env.API_KEY;
+  if (typeof alias === 'string' && alias.trim().length > 0) {
+    return alias.trim();
+  }
+  return '';
+}
+
 let client: AxiosInstance | null = null;
 
 function getAxios(): AxiosInstance {
@@ -13,13 +29,9 @@ function getAxios(): AxiosInstance {
       },
     });
     client.interceptors.request.use((config) => {
-      const apiKey =
-        typeof process.env.TMDB_API_KEY === 'string'
-          ? process.env.TMDB_API_KEY
-          : '';
       const nextParams = {
         ...(config.params as Record<string, unknown> | undefined),
-        api_key: apiKey,
+        api_key: getTmdbApiKey(),
       };
       return { ...config, params: nextParams };
     });
@@ -28,8 +40,7 @@ function getAxios(): AxiosInstance {
 }
 
 export function hasTmdbApiKey(): boolean {
-  const key = process.env.TMDB_API_KEY;
-  return typeof key === 'string' && key.length > 0;
+  return getTmdbApiKey().length > 0;
 }
 
 export async function get<T>(
